@@ -36,7 +36,11 @@ public class Controller {
     @FXML
     private BarChart reloadchart;
 
+    @FXML
+    private ScatterChart camchart;
+
     private HashMap<String,Vector<int[]>> mehrhuhndeaths = new HashMap<>();
+    private HashMap<String,Vector<float[]>> campositions = new HashMap<>();
     private HashMap<String,Vector<Integer>> score = new HashMap<>();
     private HashMap<String,int[]> reloads = new HashMap<>();
 
@@ -115,6 +119,25 @@ public class Controller {
                     reloads.get(level)[1]++;
                 }
                 reloads.get(level)[2]++;
+
+
+                if(!campositions.containsKey(level)){
+                    campositions.put(level,new Vector<>());
+                }
+                l = doc.getElementsByTagName("camPos");
+                for (int index = 0; index < l.getLength(); index++)
+                {
+                    Node pos = l.item(index);
+
+                    Node time_node = pos.getChildNodes().item(1);
+                    String value = time_node.getFirstChild().getNodeValue().replace(',','.');
+                    float time = Float.parseFloat(value);
+
+                    Node x_pos_node = pos.getChildNodes().item(3);
+                    float x_pos = Float.parseFloat(x_pos_node.getChildNodes().item(1).getFirstChild().getNodeValue().replace(',','.'));
+
+                    campositions.get(level).add(new float[]{x_pos,time});
+                }
             }
             catch (Exception e)
             {
@@ -205,5 +228,21 @@ public class Controller {
         reload_data.add(s_data_lmb);
         reload_data.add(s_data_rmb);
         reloadchart.setData(reload_data);
+
+
+        ObservableList<XYChart.Series<Number,Number>> Cambos_data_data = (camchart.getData() == null?FXCollections.observableArrayList():camchart.getData());
+        for(String key : campositions.keySet()){
+            XYChart.Series<Number, Number> level_pos = new XYChart.Series<>();
+            level_pos.setName(key);
+
+            for(float[] pos : campositions.get(key))
+            {
+                level_pos.getData().add(new XYChart.Data<>(pos[0],pos[1]));
+            }
+
+            Cambos_data_data.add(level_pos);
+        }
+
+        camchart.setData(Cambos_data_data);
     }
 }
