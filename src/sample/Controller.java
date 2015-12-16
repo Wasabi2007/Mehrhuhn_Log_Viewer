@@ -33,8 +33,12 @@ public class Controller {
     @FXML
     private BarChart scores;
 
+    @FXML
+    private BarChart reloadchart;
+
     private HashMap<String,Vector<int[]>> mehrhuhndeaths = new HashMap<>();
     private HashMap<String,Vector<Integer>> score = new HashMap<>();
+    private HashMap<String,int[]> reloads = new HashMap<>();
 
 
     @FXML
@@ -49,6 +53,7 @@ public class Controller {
         String level;
         for(File file : files)
         {
+            System.out.println(file.getAbsolutePath());
             try (FileInputStream in = new FileInputStream(file))
             {
                 DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -95,6 +100,21 @@ public class Controller {
 
                 score.get(level).add(pointscore);
                 score.get(level).sort((a,b)->b-a);
+
+                if(!reloads.containsKey(level)){
+                    reloads.put(level,new int[3]);
+                }
+                l = doc.getElementsByTagName("relode_lmb");
+                for (int index = 0; index < l.getLength(); index++)
+                {
+                    reloads.get(level)[0]++;
+                }
+                l = doc.getElementsByTagName("relode_rmb");
+                for (int index = 0; index < l.getLength(); index++)
+                {
+                    reloads.get(level)[1]++;
+                }
+                reloads.get(level)[2]++;
             }
             catch (Exception e)
             {
@@ -122,9 +142,11 @@ public class Controller {
                 kill_count[2] += kills[2];
             }
 
-            s_data_025p.getData().add(new XYChart.Data<>(key, kill_count[0]));
-            s_data_050p.getData().add(new XYChart.Data<>(key, kill_count[1]));
-            s_data_100p.getData().add(new XYChart.Data<>(key, kill_count[2]));
+            float kill_size = mehrhuhndeaths.get(key).size();
+
+            s_data_025p.getData().add(new XYChart.Data<>(key, kill_count[0]/kill_size));
+            s_data_050p.getData().add(new XYChart.Data<>(key, kill_count[1]/kill_size));
+            s_data_100p.getData().add(new XYChart.Data<>(key, kill_count[2]/kill_size));
 
             System.out.println("Level "+ key+ " 25p: "+(kill_count[0]/mehrhuhndeaths.get(key).size())+ " 50p: "+(kill_count[1]/mehrhuhndeaths.get(key).size())+ " 100p: "+(kill_count[2]/mehrhuhndeaths.get(key).size()));
         }
@@ -165,5 +187,23 @@ public class Controller {
         score_data.add(s_data_med);
         score_data.add(s_data_max);
         scores.setData(score_data);
+
+
+        ObservableList<XYChart.Series<String,Number>> reload_data = (reloadchart.getData() == null?FXCollections.observableArrayList():reloadchart.getData());
+        XYChart.Series<String, Number> s_data_lmb = new XYChart.Series<>();
+        s_data_lmb.setName("Empty Clip reload(LMB)");
+
+        XYChart.Series<String, Number> s_data_rmb = new XYChart.Series<>();
+        s_data_rmb.setName("Clip reload(RMB)");
+
+
+        for(String key : reloads.keySet()){
+            s_data_lmb.getData().add(new XYChart.Data<>(key,reloads.get(key)[0]/reloads.get(key)[2]));
+            s_data_rmb.getData().add(new XYChart.Data<>(key,reloads.get(key)[1]/reloads.get(key)[2]));
+        }
+
+        reload_data.add(s_data_lmb);
+        reload_data.add(s_data_rmb);
+        reloadchart.setData(reload_data);
     }
 }

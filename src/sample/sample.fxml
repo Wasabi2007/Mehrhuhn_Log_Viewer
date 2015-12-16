@@ -52,6 +52,22 @@
                   </BorderPane>
                </content>
           </Tab>
+            <Tab text="Reloades">
+               <content>
+                  <BorderPane prefHeight="200.0" prefWidth="200.0">
+                     <center>
+                        <BarChart fx:id="reloadchart" BorderPane.alignment="CENTER">
+                          <xAxis>
+                            <CategoryAxis side="BOTTOM" />
+                          </xAxis>
+                          <yAxis>
+                            <NumberAxis side="LEFT" />
+                          </yAxis>
+                        </BarChart>
+                     </center>
+                  </BorderPane>
+               </content>
+            </Tab>
         </tabs>
       </TabPane>
    </center>
